@@ -5,7 +5,6 @@ import com.technova.shopverse.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -13,13 +12,6 @@ import java.util.List;
 public class ProductController {
     @Autowired
     private ProductService productService;
-    private List<Product> products = new ArrayList<>();
-
-    public ProductController(){
-        products.add(new Product(1L, "Laptop Lenovo", "Notebook 15 pulgadas", 850.0));
-        products.add(new Product(2L, "Mouse Logitech", "Mouse inalámbrico", 25.5));
-        products.add(new Product(3L, "Monitor Samsung", "Monitor 24 pulgadas", 199.99));
-    }
 
     @GetMapping
     public List<Product> getAllProducts(){
