@@ -1,9 +1,11 @@
 package com.technova.shopverse.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.technova.shopverse.dto.ProductDTO;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 
 @Entity
@@ -11,25 +13,29 @@ public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @NotBlank(message = "El nombre no puede estar vacío")
     private String name;
+    @Size(min = 10, message = "La descripción debe tener al menos 10 caracteres")
     private String description;
+    @NotNull(message = "El precio es obligatorio")
+    @Min(value = 1, message = "El precio debe ser mayor a 0")
     private Double price;
+    @NotNull(message = "La categoría es obligatoria")
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
 
     public Product(){}
 
-    public Product(Long id, String name, String description, Double price) {
-        this.id = id;
+    public Product(String name, String description, Double price, Category category) {
         this.name = name;
         this.description = description;
         this.price = price;
+        this.category = category;
     }
 
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getName() {
@@ -54,6 +60,14 @@ public class Product {
 
     public void setPrice(Double price) {
         this.price = price;
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
     }
 
     @Override

@@ -1,5 +1,7 @@
 package com.technova.shopverse.service.impl;
 
+import com.technova.shopverse.dto.CategoryDTO;
+import com.technova.shopverse.dto.CategoryDetailDTO;
 import com.technova.shopverse.model.Category;
 import com.technova.shopverse.repository.CategoryRepository;
 import com.technova.shopverse.service.CategoryService;
@@ -15,26 +17,27 @@ public class CategoryServiceImpl implements CategoryService {
     @Autowired
     CategoryRepository categoryRepository;
 
-    public List<Category> getAllCategoriesService(){
-        return categoryRepository.findAll();
+    public List<CategoryDTO> getAllCategoriesService(){
+        return categoryRepository.findAll().stream() .map(this::toDTO).toList();
     }
 
-    public Optional<Category> getCategoryByIdService(Long id){
-        return categoryRepository.findById(id);
+    public Optional<CategoryDTO> getCategoryByIdService(Long id){
+        return categoryRepository.findById(id).map(this::toDTO);
     }
 
-    public Category createCategoryService(Category category){
+    public CategoryDTO createCategoryService(CategoryDTO category){
         if(category.getName() == null || category.getName().isBlank()){
             throw new IllegalArgumentException("El nombre de la categoria no puede estar vacía.");
         }
-        if(category.getDescription().length() < 10){
+        if(category.getDescription() == null || category.getDescription().length() < 10){
             throw new IllegalArgumentException("La descripción debe ser mas larga.");
         }
-        return categoryRepository.save(category);
+        Category newCategory = categoryRepository.save(new Category(category.getName(), category.getDescription()));
+        return toDTO(newCategory);
     }
 
 
-    public Category updateCategoryService(Long id, Category updated){
+    public CategoryDTO updateCategoryService(Long id, CategoryDTO updated){
         Optional<Category> optionalCategory = categoryRepository.findById(id);
         if(optionalCategory.isEmpty()){
             throw new IllegalArgumentException("La categoría que se intenta actualizar no existe.");
@@ -48,11 +51,34 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = optionalCategory.get();
         category.setName(updated.getName());
         category.setDescription(updated.getDescription());
-        return categoryRepository.save(category);
+        Category newCategory = categoryRepository.save(category);
+        return toDTO(newCategory);
     }
 
 
     public void deleteCategoryService(Long id) {
         categoryRepository.deleteById(id);
+    }
+
+    public CategoryDetailDTO getCategoryDTOById(Long id) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Categoría no encontrada"));
+
+        List<String> productNames = category.getProducts().stream()
+                .map(product -> product.getName())
+                .toList();
+
+        return new CategoryDetailDTO(
+                category.getId(),
+                category.getName(),
+                category.getDescription(),
+                productNames
+        );
+    }
+
+    public CategoryDTO toDTO(Category category) {
+        return new CategoryDTO(category.getId(),
+                category.getName(),
+                category.getDescription());
     }
 }

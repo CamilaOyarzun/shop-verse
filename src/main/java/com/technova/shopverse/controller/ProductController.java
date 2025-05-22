@@ -1,7 +1,9 @@
 package com.technova.shopverse.controller;
 
-import com.technova.shopverse.model.Product;
+import com.technova.shopverse.dto.CreateProductDTO;
+import com.technova.shopverse.dto.ProductDTO;
 import com.technova.shopverse.service.ProductService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,8 +18,8 @@ public class ProductController {
     private ProductService productService;
 
     @GetMapping
-    public ResponseEntity<List<Product>> getAllProducts(){
-        List<Product> products = productService.getAllProductsService();
+    public ResponseEntity<List<ProductDTO>> getAllProducts(){
+        List<ProductDTO> products = productService.getAllProductsService();
         if(products.isEmpty()){
             return ResponseEntity.noContent().build();
         } else {
@@ -25,14 +27,14 @@ public class ProductController {
         }
     }
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getProductById(@PathVariable Long id){
+    public ResponseEntity<ProductDTO> getProductById(@PathVariable Long id){
         return productService.getProductByIdService(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<Product> createProduct(@RequestBody Product newProduct){
+    public ResponseEntity<ProductDTO> createProduct(@Valid @RequestBody CreateProductDTO newProduct){
         try {
-            Product product = productService.createProductService(newProduct);
+            ProductDTO product = productService.createProductService(newProduct);
             return ResponseEntity.status(HttpStatus.CREATED).body(product);
         } catch (IllegalArgumentException e){
             return ResponseEntity.badRequest().build();
@@ -40,9 +42,9 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product updatedProduct) {
+    public ResponseEntity<ProductDTO> updateProduct(@Valid @PathVariable Long id, @RequestBody CreateProductDTO updatedProduct) {
         try {
-            Product updated = productService.updateProductService(id, updatedProduct);
+            ProductDTO updated = productService.updateProductService(id, updatedProduct);
             return ResponseEntity.ok(updated);
         } catch (IllegalArgumentException e){
             return ResponseEntity.notFound().build();
@@ -58,5 +60,14 @@ public class ProductController {
          } catch (IllegalArgumentException e){
              return ResponseEntity.notFound().build();
          }
+    }
+    @GetMapping("/by-category/{categoryId}")
+    public ResponseEntity<List<ProductDTO>> getByCategory(@PathVariable Long categoryId) {
+        List<ProductDTO> products = productService.getByCategoryId(categoryId);
+        if (products.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(products);
+
     }
 }

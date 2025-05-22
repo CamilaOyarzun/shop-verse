@@ -1,8 +1,11 @@
 package com.technova.shopverse.controller;
 
+import com.technova.shopverse.dto.CategoryDTO;
+import com.technova.shopverse.dto.CategoryDetailDTO;
 import com.technova.shopverse.model.Category;
 import com.technova.shopverse.model.Product;
 import com.technova.shopverse.service.CategoryService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,8 +22,8 @@ public class CategoryController {
     CategoryService categoryService;
 
     @GetMapping
-    public ResponseEntity<List<Category>> getAllCategories(){
-        List<Category> categories = categoryService.getAllCategoriesService();
+    public ResponseEntity<List<CategoryDTO>> getAllCategories(){
+        List<CategoryDTO> categories = categoryService.getAllCategoriesService();
         if(categories.isEmpty()){
             return ResponseEntity.noContent().build();
         } else {
@@ -28,14 +31,14 @@ public class CategoryController {
         }
     }
     @GetMapping("/{id}")
-    public ResponseEntity<Category> getCategoryById(@PathVariable Long id){
+    public ResponseEntity<CategoryDTO> getCategoryById(@PathVariable Long id){
         return categoryService.getCategoryByIdService(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<Category> createCategory(@RequestBody Category newCategory){
+    public ResponseEntity<CategoryDTO> createCategory(@Valid @RequestBody CategoryDTO newCategory){
         try {
-            Category category = categoryService.createCategoryService(newCategory);
+            CategoryDTO category = categoryService.createCategoryService(newCategory);
             return ResponseEntity.status(HttpStatus.CREATED).body(category);
         } catch (IllegalArgumentException e){
             return ResponseEntity.badRequest().build();
@@ -43,9 +46,9 @@ public class CategoryController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Category> updateCategory(@PathVariable Long id, @RequestBody Category updatedCategory) {
+    public ResponseEntity<CategoryDTO> updateCategory(@Valid @PathVariable Long id, @RequestBody CategoryDTO updatedCategory) {
         try {
-            Category updated = categoryService.updateCategoryService(id, updatedCategory);
+            CategoryDTO updated = categoryService.updateCategoryService(id, updatedCategory);
             return ResponseEntity.ok(updated);
         } catch (IllegalArgumentException e){
             return ResponseEntity.notFound().build();
@@ -59,6 +62,15 @@ public class CategoryController {
             categoryService.deleteCategoryService(id);
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException e){
+            return ResponseEntity.notFound().build();
+        }
+    }
+    @GetMapping("/{id}/details")
+    public ResponseEntity<CategoryDetailDTO> getCategoryDetails(@PathVariable Long id) {
+        try {
+            CategoryDetailDTO dto = categoryService.getCategoryDTOById(id);
+            return ResponseEntity.ok(dto);
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
         }
     }
